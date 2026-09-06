@@ -19,6 +19,7 @@ from .deployment import load_env_file, probe_readiness, runtime_config, static_r
 from .detector import Calibration
 from .epochs import EpochRunner
 from .evaluation import evaluate
+from .hybrid import HybridDemoRuntime, create_hybrid_app
 from .meter import MeterConfig, MeterStore, collect_http, collect_into_store
 from .models import EpochEvidence, Mode, WorkloadSpec
 from .physics import MeterProfile, characterize, pipeline_report
@@ -175,6 +176,10 @@ def parser():
     p.add_argument("--profile-path", type=Path)
     p = commands.add_parser("runpod-demo", help="serve the laptop auditor and plain POC dashboard")
     p.add_argument("--env-file", type=Path, default=Path(".env.runpod"))
+    p = commands.add_parser(
+        "hybrid-demo", help="serve the transparent live-compute plus simulated-meter dashboard"
+    )
+    p.add_argument("--env-file", type=Path, default=Path(".env.hybrid"))
     p = commands.add_parser("deployment-readiness", help="report missing two-Pod configuration")
     p.add_argument("--env-file", type=Path, default=Path(".env.runpod"))
     p.add_argument("--probe", action="store_true", help="query configured live endpoints")
@@ -374,6 +379,59 @@ def main():
             demo,
         )
         uvicorn.run(app, host=config["host"], port=config["port"], access_log=False)
+    elif args.command == "hybrid-demo":
+        import uvicorn
+
+        load_env_file(args.env_file, override=True)
+        site_url = os.environ.get("SITE_API_URL", "").strip()
+        helper_url = os.environ.get("HELPER_API_URL", "").strip()
+        if not site_url.startswith("https://") or not helper_url.startswith("https://"):
+            raise ValueError("SITE_API_URL and HELPER_API_URL must be configured HTTPS endpoints")
+        site_worker_token = secret("SITE_WORKER_TOKEN")
+        site_control_token = secret("SITE_CONTROL_TOKEN")
+        helper_worker_token = secret("HELPER_WORKER_TOKEN")
+        if len({site_worker_token, site_control_token, helper_worker_token}) != 3:
+            raise ValueError("hybrid worker and control credentials must be distinct")
+        private = Path(os.environ.get("HYBRID_PRIVATE_DIR", "private/hybrid-demo"))
+        hybrid_specs = specs(
+            os.environ.get("HYBRID_WORKLOAD_SPECS", "config/workloads.hybrid-demo.json")
+        )
+        polling_s = float(os.environ.get("SENSOR_POLL_INTERVAL_S", "0.25"))
+        worker = HTTPWorker(site_url, site_worker_token, site_control_token)
+        telemetry = DemoTelemetryHub(
+            RemoteTelemetryStream(
+                TelemetryRole.DECLARED_SITE,
+                site_url,
+                site_worker_token,
+                polling_s,
+                private / "facility-live-host-telemetry.jsonl",
+            ),
+            RemoteTelemetryStream(
+                TelemetryRole.REMOTE_HELPER,
+                helper_url,
+                helper_worker_token,
+                polling_s,
+                private / "helper-private-ground-truth.jsonl",
+            ),
+        )
+        runtime = HybridDemoRuntime(
+            worker,
+            telemetry,
+            hybrid_specs,
+            Path(os.environ.get("HYBRID_CAPTURE_PATH", "runs/hybrid-demo/capture.json")),
+            facility_name=os.environ.get("FACILITY_NAME", "NVIDIA H100 80GB HBM3"),
+            facility_region=os.environ.get("FACILITY_REGION", "US Northeast"),
+            helper_name=os.environ.get("HELPER_NAME", "NVIDIA H100 80GB HBM3"),
+            helper_region=os.environ.get("HELPER_REGION", "Iceland / Europe"),
+        )
+        app = create_hybrid_app(runtime)
+        # Browser control endpoints contain no worker credentials and stay loopback-only.
+        uvicorn.run(
+            app,
+            host="127.0.0.1",
+            port=int(os.environ.get("HYBRID_DASHBOARD_PORT", "8100")),
+            access_log=False,
+        )
     elif args.command in {"auditor", "physics-run"}:
         bank = ChallengeBank(args.private)
         meter = MeterStore(

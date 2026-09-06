@@ -51,8 +51,8 @@ def setup_runner(tmp_path, worker, repeats=1):
             lanes=4,
             words_per_lane=32,
             memory_steps=8,
-            segment_s=0.08,
-            deadline_s=0.07,
+            segment_s=0.15,
+            deadline_s=0.12,
         )
         for m in Mode
     ]

@@ -17,6 +17,8 @@ The two-Pod RunPod preparation, unpolished dashboard, required environment value
 and startup commands are documented in [the RunPod POC runbook](docs/RUNPOD_POC.md).
 The first bank-free H100 deployment/profile sequence is in
 [the H100 first-run guide](docs/H100_FIRST_RUN.md).
+The polished transparent hackathon flow, capture/replay controls, and exact stage
+script are in [the hybrid demo runbook](docs/HYBRID_DEMO_RUNBOOK.md).
 
 ## Install and verify
 
@@ -66,6 +68,7 @@ protocol and forwarding integration, not location or electrical detection.
 | `telemetry.py`, `demo.py`, `dashboard.py` | Role-separated NVML_DEMO host diagnostics and the unpolished POC display; excluded from production meter evidence |
 | `deployment.py`, `deploy/runpod/` | RunPod environment validation, live endpoint probe, and Pod startup scripts |
 | `profiling.py` | Bank-free exploratory CUDA profiles synchronized with raw, non-independent NVML host telemetry |
+| `hybrid.py`, `hybrid_dashboard.py` | Separate receipt-free HYBRID_DEMO with live compute/routing, digital-twin inference, capture and explicit replay |
 
 ## The protocol
 

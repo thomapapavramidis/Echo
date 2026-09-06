@@ -7,9 +7,20 @@ RunPod deployment or hardware-dependent calibration has occurred. `NVML_DEMO` ho
 telemetry is proof-of-concept diagnostics and is permanently excluded from the
 independent physical-evidence detector. See [RUNPOD_POC.md](RUNPOD_POC.md).
 
-Two matching H100 Pods are now available, but their endpoint IDs and live profile
-artifacts have not yet been supplied to this repository. The bank-free synchronized
-NVML profiler and exact first-run commands are documented in H100_FIRST_RUN.md.
+Two matching H100 Pods and their proxy URLs are now available, but live connectivity
+and profile artifacts have not yet been verified from this repository. The bank-free
+synchronized NVML profiler and first-run commands are documented in H100_FIRST_RUN.md.
+
+The judge-facing pivot is implemented separately as `HYBRID_DEMO`: real fresh
+H100 challenges and routing, separate simulated US/Iceland facility-meter traces,
+private helper-response ground truth, capture, explicit replay, a projection
+dashboard, and no production receipt or physical-verification endpoint. Raw live
+NVML is confined to the collapsed diagnostic panel and excluded from detection.
+
+Reported H100 profiles place the current verified GPU work at approximately 12–15
+milliseconds with warm active power approximately 1–3 W above warm idle. Those
+results motivated the dual digital-twin stage view; they are not calibration data
+or independent physical evidence.
 
 ## Implemented
 
@@ -46,8 +57,8 @@ NVML profiler and exact first-run commands are documented in H100_FIRST_RUN.md.
 
 ## Validated here
 
-- Final test suite before live Pod configuration: **65 passed**, including CUDA tests, on September 6, 2026.
-  Ruff lint and formatting checks pass. All services launched for validation were
+- Final test suite after the hybrid-demo correction: **72 passed**, including CUDA tests, on September 6, 2026.
+  Ruff lint and Python compilation checks pass. All services launched for validation were
   stopped afterward; no background demo service is intentionally left running.
 
 - CPU and RTX 5060 Laptop GPU agree for all four workload modes, including multiple
