@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "compute-echo"
+version = "0.1.0"
+description = "Independent challenge and site-power audit prototype"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=2.2,<3", "pydantic>=2.11,<3", "fastapi>=0.115,<1",
+  "uvicorn>=0.34,<1", "httpx>=0.28,<1", "cryptography>=44,<50",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.3,<10", "pytest-asyncio>=0.26,<2", "ruff>=0.11,<1"]
+cuda = ["cupy-cuda12x[ctk]>=14,<15"]
+nvml = ["nvidia-ml-py>=12,<14"]
+serial = ["pyserial>=3.5,<4"]
+
+[project.scripts]
+echo-audit = "compute_echo.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = ["cuda: requires an operational CUDA installation"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

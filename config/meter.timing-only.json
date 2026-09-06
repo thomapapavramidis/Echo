@@ -1,0 +1,9 @@
+{
+  "meter_id": "no-meter-timing-only",
+  "provenance": "simulation",
+  "installation": "No physical measurements; computational integration tests only",
+  "source_freshness": "unknown",
+  "max_sample_age_s": 5,
+  "max_clock_skew_s": 0.25,
+  "max_watts": 300
+}

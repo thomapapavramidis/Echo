@@ -1,0 +1,6 @@
+[
+  {"mode":"IDLE","operations":1,"segment_s":8,"deadline_s":6},
+  {"mode":"TENSOR","operations":16,"m":2048,"n":2048,"k":8192,"segment_s":8,"deadline_s":6},
+  {"mode":"MEMORY","operations":2,"lanes":4096,"words_per_lane":8192,"memory_steps":8192,"segment_s":8,"deadline_s":6},
+  {"mode":"MIXED","operations":2,"m":2048,"n":2048,"k":8192,"lanes":4096,"words_per_lane":8192,"memory_steps":8192,"segment_s":8,"deadline_s":6}
+]
